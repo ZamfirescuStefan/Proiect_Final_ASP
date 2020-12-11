@@ -143,8 +143,12 @@ namespace Proiect.Controllers
         public ActionResult NewMember(string TeamId)
         {
             Team team = db.Teams.Find(Convert.ToInt32(TeamId));
+            var query = from x in db.Users
+                        select x;
+            ViewBag.query = query;
             if (User.Identity.GetUserId() == team.UserId || User.IsInRole("Admin"))
             {
+                
                 team.Members = GetAllMembers(team);
                 return View(team);
             }
@@ -185,8 +189,11 @@ namespace Proiect.Controllers
         }
         [HttpPost]
         [Authorize(Roles = "Organiser,Admin")]
-        public ActionResult NewMember(string UserId, int TeamId, ApplicationUser user)
+        public ActionResult NewMember(string UserId, int TeamId, string RUser)
         {
+            var query = from x in db.Users
+                        select x;
+            ViewBag.query = query;
             Team team = db.Teams.Find(TeamId);
             team.Members = GetAllMembers(team);
             try
@@ -196,7 +203,7 @@ namespace Proiect.Controllers
                     if (ModelState.IsValid)
                     {
                         TeamUser tu = new TeamUser();
-                        tu.Id = team.AuxUser;
+                        tu.Id = RUser;
                         tu.TeamId = team.TeamId;
                         db.TeamUsers.Add(tu);
                         db.SaveChanges();

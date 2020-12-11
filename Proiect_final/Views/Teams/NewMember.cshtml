@@ -1,25 +1,28 @@
 ﻿@model Proiect.Models.Team
-
 @{
     ViewBag.Title = "NewMember";
 }
-
 <h2>NewMember</h2>
-
-@using (Html.BeginForm(actionName: "NewMember", controllerName: "Teams", routeValues:new {UserId = Model.UserId, TeamId = Model.TeamId}))
+@using (Html.BeginForm(actionName: "NewMember", controllerName: "Teams", routeValues: new { UserId = Model.UserId, TeamId = Model.TeamId}))
 {
     <br />
     @Html.HiddenFor(m => m.UserId)
     @Html.HiddenFor(m => m.TeamId)
     <br />
 
-    @Html.Label("AuxUser", "Alegeti membrul")
-    @Html.DropDownListFor(m => m.AuxUser, new SelectList(Model.Members, "Value", "Text"), "Selectati membrul", new { @class = "form-control" })
+    <h1>Test afisare</h1>
+    <select name="Ruser">
+        @foreach (var elem in ViewBag.query)
+        {
+            <option value="@elem.Id">
+                @elem.UserName
+            </option>
+        }
+    </select>
 
     <br />
 
     <button class="btn btn-default" type="submit">Adaugati membrul</button>
 }
 <br />
-
 
