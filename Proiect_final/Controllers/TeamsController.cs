@@ -28,19 +28,34 @@ namespace Proiect.Controllers
         }
 
         [HttpGet]
-       // [Authorize(Roles = "Member,Organiser,Admin")]
+        // [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult Show(int id)
         {
             Team team = db.Teams.Find(id);
+
+            ViewBag.Members = UsersToShow(id);
             if (TempData.ContainsKey("message"))
             {
                 ViewBag.Message = TempData["message"];
             }
             return View(team);
         }
+        List<ApplicationUser> UsersToShow(int id)
+        {
+            var obj = from x in db.TeamUsers
+                      where x.TeamId == id
+                      select x;
+            List<ApplicationUser> toShow = new List<ApplicationUser>();
+            foreach (var elem in obj)
+            {
+                ApplicationUser user = db.Users.Find(elem.Id);
+                toShow.Add(user);
 
+            }
+            return toShow;
+        }
         [HttpGet]
-       // [Authorize(Roles = "Member,Organiser,Admin")]
+        // [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult New()
         {
             Team team = new Team();
@@ -57,8 +72,10 @@ namespace Proiect.Controllers
                 if (ModelState.IsValid)
                 {
                     var user = db.Users.Find(User.Identity.GetUserId());
-                    team.Users.Add(user);
-                    db.Teams.Add(team);
+                    TeamUser tu = new TeamUser();
+                    tu.Id = user.Id;
+                    tu.TeamId = team.TeamId;
+                    db.TeamUsers.Add(tu);
                     db.SaveChanges();
                     TempData["message"] = "Echipa a fost adaugata!";
                     return RedirectToAction("Index");
@@ -151,7 +168,7 @@ namespace Proiect.Controllers
                     Value = member.Id.ToString(),
                     Text = member.UserName.ToString()
                 });
-                
+
             }
             /*foreach (var elem in team.Users)
             {
@@ -178,8 +195,11 @@ namespace Proiect.Controllers
                 {
                     if (ModelState.IsValid)
                     {
-
-                        team.Users.Add(user);
+                        TeamUser tu = new TeamUser();
+                        tu.Id = team.AuxUser;
+                        tu.TeamId = team.TeamId;
+                        db.TeamUsers.Add(tu);
+                        db.SaveChanges();
                         TempData["message"] = "Membrul a fost adaugat!";
                         return RedirectToAction("/Show/" + TeamId.ToString());
                     }
@@ -198,7 +218,7 @@ namespace Proiect.Controllers
             {
                 return View(team);
             }
-      
+
         }
     }
 }

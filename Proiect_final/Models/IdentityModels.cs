@@ -13,7 +13,8 @@ namespace Proiect_final.Models
     public class ApplicationUser : IdentityUser
     {
         public IEnumerable<SelectListItem> AllRoles { get; set; }
-        public ICollection<Proiect.Models.Task> Tasks { get; set; }
+        public virtual ICollection<Proiect.Models.Task> Tasks { get; set; }
+        public virtual ICollection<TeamUser> TeamUsers { get; set; }
 
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
@@ -36,6 +37,8 @@ namespace Proiect_final.Models
         public DbSet<Project> Projects { get; set; }
         public DbSet<Proiect.Models.Task> Tasks { get; set; }
         public DbSet<Team> Teams { get; set; }
+        public DbSet<TeamUser> TeamUsers { get; set; }
+
         public static ApplicationDbContext Create()
         {
             return new ApplicationDbContext();

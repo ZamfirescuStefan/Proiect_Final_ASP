@@ -29,5 +29,12 @@
 </form>
 <a href="/Teams/Edit/@Model.TeamId" class="btn btn-default" style="background-color:aquamarine">Editeaza echipa</a>
 <br/>
+<br/>
+<br/>
+@foreach (var elem in ViewBag.Members)
+{
+    <p>@elem.UserName</p>
+}
+<br/>
 <hr/>
 <a href="/Teams/Index" class="btn btn-default">Inapoi la lista echipelor</a>

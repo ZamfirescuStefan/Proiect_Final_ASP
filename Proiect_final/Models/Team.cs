@@ -12,15 +12,14 @@ namespace Proiect.Models
     {
         [Key]
         public int TeamId { get; set; }
-        [Required(ErrorMessage ="Numele echipei este obligatoriu")]
+        [Required(ErrorMessage = "Numele echipei este obligatoriu")]
         public string TeamName { get; set; }
         public string UserId { get; set; }
         public virtual ApplicationUser User { get; set; }
-        
-        public virtual ICollection<ApplicationUser> Users { get; set; }
+
+        public virtual ICollection<TeamUser> TeamUsers { get; set; }
         public virtual ICollection<Project> Projects { get; set; }
         public IEnumerable<SelectListItem> Members { get; set; }
-        public string AuxUser{ get; set; }
-
+        public string AuxUser { get; set; }
     }
 }
