@@ -1,0 +1,27 @@
+﻿
+@{
+    ViewBag.Title = "Taskuri";
+}
+
+<h1>@ViewBag.Message</h1>
+
+@foreach (Proiect.Models.Task task in ViewBag.Tasks)
+{
+    <a href="/Tasks/Show/@task.TaskId">@task.TaskName</a>
+    <br />
+    <p>@task.TaskDescription</p>
+    <br />
+    <p>@task.Status</p>
+    <br />
+    <hr />
+
+}
+
+
+<br />
+<br />
+<br />
+<a href="/Tasks/New">Adauga task</a>
+<br />
+<br />
+<a href="/Projects/Index">Inapoi la lista proiectelor</a>

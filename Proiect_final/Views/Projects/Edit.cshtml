@@ -1,0 +1,32 @@
+﻿@model Proiect.Models.Project
+@{
+    ViewBag.Title = "Editare proiect";
+}
+
+
+@using (Html.BeginForm(actionName: "Edit", controllerName: "Projects", routeValues: Model.ProjectId))
+{
+    @Html.HttpMethodOverride(HttpVerbs.Put)
+
+    @Html.HiddenFor(m => m.ProjectId)
+
+    @Html.Label("ProjectName", "Nume proiect")
+    @Html.Editor("ProjectName")
+    @Html.ValidationMessage("ProjectName", null, new { @class = "text-danger" })
+    <br />
+
+    @Html.Label("ProjectDescription", "Descriere proiect")
+    @Html.Editor("ProjectDescription")
+    @Html.ValidationMessage("ProjectDescription", null, new { @class = "text-danger" })
+
+    <br />
+
+    @Html.Label("TeamId", "Echipa")
+    @Html.DropDownListFor(m => m.TeamId, new SelectList(Model.Echipe, "Value", "Text"), "Selectati echipa", new { @class = "form-control" })
+    @Html.ValidationMessageFor(m => m.TeamId, null, new { @class = "text-danger" })
+    <br />
+
+    <button type="submit">Salvare modificari</button>
+}
+    
+<a href="/Projects/Index" class="btn btn-info">Inapoi la lista proiectelor</a>

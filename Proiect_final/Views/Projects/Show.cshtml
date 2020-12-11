@@ -1,0 +1,49 @@
+﻿@model Proiect.Models.Project
+
+@{
+    ViewBag.Title = Model.ProjectName.ToString();
+}
+
+<h3>@ViewBag.Message</h3>
+
+<h1>@Model.ProjectName</h1>
+<hr />
+<br />
+<h2>@Model.ProjectDescription</h2>
+<hr />
+<br />
+<a href="/Teams/Show/@Model.TeamId">@Model.Team.TeamName</a>
+<br />
+<hr />
+<h2>Task-urile proiectului</h2>
+<hr />
+@foreach (Proiect.Models.Task task in Model.Tasks)
+{
+    <a href="/Tasks/Show/@task.TaskId">@task.TaskName</a>
+    <br />
+}
+@if ((ViewBag.afisareButoane == true && Model.UserId == ViewBag.currentUser) || ViewBag.isAdmin)
+{
+    <form method="get" action="/Tasks/New">
+        <input type="hidden" id="Project1" name="ProiectId" value="@Model.ProjectId"><br>
+        <button type="submit" class="btn btn-info">Adauga task nou</button>
+    </form>
+    <hr />
+    <br />
+    <br />
+    <br />
+
+    <form method="post" action="/Projects/Delete/@Model.ProjectId">
+        @Html.HttpMethodOverride(HttpVerbs.Delete)
+
+        <button type="submit" class="btn btn-danger">Stergere proiect</button>
+    </form>
+    <hr />
+
+    <a href="/Projects/Edit/@Model.ProjectId" class="btn btn-info">Editare proiect</a>
+    <br />
+    <hr />
+}
+
+<hr />
+<a href="/Projects/Index" class="btn btn-info">Inapoi la lista proiectelor</a>

@@ -1,0 +1,33 @@
+﻿@model Proiect.Models.Team
+
+@{
+    ViewBag.Title = Model.TeamName.ToString();
+}
+
+<h1>Echipa @Model.TeamName</h1>
+
+<h2>@ViewBag.Message</h2>
+@foreach (Proiect.Models.Project project in Model.Projects)
+{
+    <a href="/Projects/Show/@project.ProjectId">@project.ProjectName</a>
+    <br/>
+}
+<br/>
+<br/>
+<hr/>
+
+<form method="post" action="/Teams/Delete/@Model.TeamId">
+    @Html.HttpMethodOverride(HttpVerbs.Delete)
+
+    <button class="btn btn-danger" type="submit">Sterge echipa</button>
+</form>
+<br/>
+<hr/>
+<form method="get" action="/Teams/NewMember/@Model.TeamId">
+    <input type="hidden" id="TeamId" name="TeamId" value="@Model.TeamId"><br>
+    <button class="btn btn-info" type="submit">Adauga membru</button>
+</form>
+<a href="/Teams/Edit/@Model.TeamId" class="btn btn-default" style="background-color:aquamarine">Editeaza echipa</a>
+<br/>
+<hr/>
+<a href="/Teams/Index" class="btn btn-default">Inapoi la lista echipelor</a>

@@ -1,0 +1,42 @@
+﻿@model Proiect.Models.Task
+@{
+    ViewBag.Title = "Adaugare task";
+}
+
+
+@using (Html.BeginForm(actionName: "New", controllerName: "Tasks"))
+{
+
+        @Html.Label("TaskName", "Nume task")
+    @Html.TextBox("TaskName", null, new { @class = "form-control" })
+    @Html.ValidationMessage("TaskName", null, new { @class = "text-danger" })
+    <br />
+
+    @Html.Label("TaskDescription", "Descriere task")
+    @Html.TextBox("TaskDescription", null, new { @class = "form-control" })
+    @Html.ValidationMessage("TaskDescription", null, new { @class = "text-danger" })
+
+    <br />
+
+    @Html.Label("StartDate", "Data start")
+    @Html.TextBox("StartDate", "", new { @class = "form-control" })
+    @Html.ValidationMessage("StartDate", null, new { @class = "text-danger" })
+
+    <br />
+
+    @Html.Label("EndDate", "Data final")
+    @Html.TextBox("EndDate", "", new { @class = "form-control" })
+    @Html.ValidationMessage("EndDate", null, new { @class = "text-danger" })
+
+    <br />
+
+    @Html.HiddenFor(m => m.ProjectId)
+    @Html.HiddenFor(m => m.UserId)
+    <br />
+
+    <button type="submit">Adaugati taskul</button>
+}
+
+<br />
+<hr />
+<a href="/Tasks/Index" class="btn btn-info" style="background-color:lightgrey">Inapoi la lista taskurilor</a>

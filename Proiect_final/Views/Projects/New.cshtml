@@ -1,0 +1,39 @@
+﻿@model Proiect.Models.Project
+@{
+    ViewBag.Title = "Adaugare proiect";
+}
+
+@using (Html.BeginForm(actionName: "New", controllerName: "Projects"))
+{
+    @Html.Label("ProjectName", "Nume proiect")
+    @Html.TextBox("ProjectName", null, new { @class = "form-control" })
+    @Html.ValidationMessage("ProjectName", null, new { @class = "text-danger" })
+    <br />
+
+    @Html.Label("ProjectDescription", "Descriere proiect")
+    @Html.TextBox("ProjectDescription", null, new { @class = "form-control" })
+    @Html.ValidationMessage("ProjectDescription", null, new { @class = "text-danger" })
+    <br />
+
+    <br />
+    @Html.Label("TeamId", "Alegeti echipa")
+    @Html.DropDownListFor(m => m.TeamId, new SelectList(Model.Echipe, "Value", "Text"), "Selectati echipa", new { @class = "form-control" })
+    @Html.ValidationMessageFor(m => m.TeamId, null, new { @class = "text-danger" })<br />
+    <br />
+
+    <button class="btn btn-default" type="submit">Adaugati proiectul</button>
+}
+<br />
+
+<form method="post" action="/Teams/New">
+    @Html.Label("TeamName" , "Adauga o echipa noua")
+    @Html.TextBox("TeamName", null, new { @class = "form-control"})
+    @Html.Hidden("UserId",Model.UserId )
+    <input type="hidden" name="UserId" value="@Model.UserId" />
+    <br />
+    <button class="btn btn-default" type="submit">Creeaza o echipa noua </button>
+</form>
+
+<br />
+<hr />
+<a href="/Projects/Index" class="btn btn-info" style="background-color:lightgrey">Inapoi la lista proiectelor</a>

@@ -1,0 +1,20 @@
+﻿@model Proiect.Models.Team
+
+@{
+    ViewBag.Title = "Adaugare echipa";
+}
+
+@using (Html.BeginForm(actionName: "New", controllerName: "Teams"))
+{
+    @Html.Label("TeamName", "Numele echipei")
+    @Html.TextBox("TeamName", null, new { @class = "form-control" })
+    @Html.ValidationMessage("TeamName", null, new { @class = "text-danger" })
+    @Html.Hidden("UserId", Model.UserId)
+    <br />
+    <button type="submit">Adaugati echipa</button>
+}
+
+<br />
+<hr />
+<br />
+<a href="/Teams/Index" class="btn btn-default" style="background-color:lightgreen">Inapoi la lista echipelor</a>

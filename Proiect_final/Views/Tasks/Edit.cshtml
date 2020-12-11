@@ -1,0 +1,48 @@
+﻿@model Proiect.Models.Task
+@{
+    ViewBag.Title = "Editare task";
+}
+
+<h2>Editare task</h2>
+
+@using (Html.BeginForm(actionName: "Edit", controllerName: "Tasks", routeValues: "TaskId"))
+{
+    @Html.HttpMethodOverride(HttpVerbs.Put)
+
+    @Html.HiddenFor(m => m.TaskId)
+    @Html.HiddenFor(m => m.UserId)
+    @Html.Label("TaskName", "Nume task")
+    @Html.Editor("TaskName")
+    @Html.ValidationMessage("TaskName", null, new { @class = "text-danger" })
+    <br />
+
+    @Html.Label("TaskDescription", "Descriere task")
+    @Html.Editor("TaskDescription")
+    @Html.ValidationMessage("TaskDescription", null, new { @class = "text-danger" })
+
+    <br />
+
+    @Html.Label("StartDate", "Data start")
+    @Html.Editor("StartDate")
+    @Html.ValidationMessage("StartDate", null, new { @class = "text-danger" })
+
+    <br />
+
+    @Html.Label("EndDate", "Data final")
+    @Html.Editor("EndDate")
+    @Html.ValidationMessage("EndDate", null, new { @class = "text-danger" })
+
+    <br />
+
+    @Html.Label("Status", "Alegeti statusul")
+    @Html.DropDownListFor(m => m.Status, new SelectList(Model.Statusuri, "Value", "Text"), "Selectati statusul", new { @class = "form-control" })
+    @Html.ValidationMessageFor(m => m.Status, null, new { @class = "text-danger" })<br />
+    <br />
+
+    <button type="submit">Salvare modificari</button>
+}
+
+<br />
+<hr />
+<br />
+<a href="/Tasks/Index">Inapoi la lista taskurilor</a>

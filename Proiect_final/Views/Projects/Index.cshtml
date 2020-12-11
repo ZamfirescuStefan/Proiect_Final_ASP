@@ -1,0 +1,22 @@
+﻿
+@{
+    ViewBag.Title = "Proiecte";
+}
+
+<h1>@ViewBag.Message</h1>
+<br />
+@foreach (Proiect.Models.Project project in ViewBag.Projects)
+{
+    <div>
+        <a href="/Projects/Show/@project.ProjectId"><h1>@project.ProjectName</h1></a>
+        <hr />
+        <p>@project.ProjectDescription</p>
+        <br/>
+        <br/>
+        <hr/>
+    </div>
+}
+<br/>
+<a href="/Projects/New" class="btn btn-info" style="background-color:lightsalmon">Adauga proiect</a>
+<br/>
+<a href="/Teams/Index" class="btn btn-info" style="background-color:lightsalmon">Lista echipelor</a>

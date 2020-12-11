@@ -1,0 +1,24 @@
+﻿
+@{
+    ViewBag.Title = "Echipe";
+}
+
+<h1 style="color:royalblue">@ViewBag.Message</h1>
+<br />
+
+@foreach (Proiect.Models.Team t in ViewBag.Teams)
+{
+    <a href="/Teams/Show/@t.TeamId"><h1>@t.TeamName</h1></a>
+    <hr />
+    <br />
+}
+<br />
+<a href="/Projects/Index" class="btn btn-info" style="background-color:lightgreen">Lista proiectelor</a>
+<hr />
+<br />
+<a href="/Tasks/Index" class="btn btn-info" style="background-color:lightgreen">Lista taskurilor</a>
+<hr />
+
+<br />
+<hr />
+<a href="/Teams/New" class="btn btn-info">Creare echipa</a>

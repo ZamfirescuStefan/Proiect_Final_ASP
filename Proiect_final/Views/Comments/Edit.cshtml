@@ -1,0 +1,28 @@
+﻿@model Proiect.Models.Comment
+@{
+    ViewBag.Title = "Editare comentariu";
+}
+
+<h2>Editare comentariu</h2>
+
+@using (Html.BeginForm(actionName: "Edit", controllerName: "Comments", routeValues: Model.CommentId))
+{
+    @Html.HttpMethodOverride(HttpVerbs.Put)
+
+    @Html.HiddenFor(m => m.CommentId)
+    <br />
+    <p>Task: @Model.Task.TaskName</p>
+    <br />
+    @Html.Label("CommentContent", "Continut comentariu")
+    <br />
+    @Html.Editor("CommentContent")
+    @Html.ValidationMessage("CommentContent", new { @class = "text-danger" })
+    <br /><br />
+    <br />
+    @Html.HiddenFor(m => m.Date)
+    @Html.HiddenFor(m => m.TaskId)
+    @Html.HiddenFor(m => m.UserId)
+    <br />
+    <br />
+    <button type="submit">Modificare comentariu</button>
+}
