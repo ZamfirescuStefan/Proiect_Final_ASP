@@ -10,6 +10,7 @@
     @Html.TextBox("TeamName", null, new { @class = "form-control" })
     @Html.ValidationMessage("TeamName", null, new { @class = "text-danger" })
     @Html.Hidden("UserId", Model.UserId)
+    @Html.Hidden("AuxUser", Model.AuxUser)
     <br />
     <button type="submit">Adaugati echipa</button>
 }

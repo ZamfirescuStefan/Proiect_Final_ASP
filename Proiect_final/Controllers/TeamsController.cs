@@ -16,7 +16,7 @@ namespace Proiect.Controllers
 
         // GET: Teams
         [HttpGet]
-        [Authorize(Roles = "Member,Organiser,Admin")]
+        [Authorize(Roles = "Admin")]
         public ActionResult Index()
         {
             ViewBag.Teams = db.Teams;
@@ -24,7 +24,15 @@ namespace Proiect.Controllers
             {
                 ViewBag.Message = TempData["message"];
             }
-            return View();
+            if ( User.IsInRole("Admin"))
+            {
+                return View();
+            }
+            else
+            {
+                TempData["message"] = "Nu aveti dreptul sa vizualizati toate echipele";
+                return Redirect("/Home/Index");
+            }
         }
 
         [HttpGet]
@@ -77,7 +85,7 @@ namespace Proiect.Controllers
             return toShow;
         }
         [HttpGet]
-        [Authorize(Roles = "Organiser,Admin")]
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult New()
         {
             Team team = new Team();
@@ -86,7 +94,7 @@ namespace Proiect.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Organiser,Admin")]
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult New(Team team)
         {
             try
@@ -98,9 +106,10 @@ namespace Proiect.Controllers
                     tu.Id = user.Id;
                     tu.TeamId = team.TeamId;
                     db.TeamUsers.Add(tu);
+                    db.Teams.Add(team);
                     db.SaveChanges();
                     TempData["message"] = "Echipa a fost adaugata!";
-                    return RedirectToAction("Index");
+                    return Redirect("/Home/Index");
                 }
                 else
                 {
@@ -114,15 +123,24 @@ namespace Proiect.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Organiser,Admin")]
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult Edit(int id)
         {
             Team team = db.Teams.Find(id);
-            return View(team);
+            if (team.UserId == User.Identity.GetUserId() || User.IsInRole("Admin"))
+            {
+                return View(team);
+            }
+            else
+            {
+                TempData["message"] = "Nu aveti dreptul sa modificati aceasta echipa";
+                return Redirect("/Home/Index"); 
+            }
+
         }
 
         [HttpPut]
-        [Authorize(Roles = "Organiser,Admin")]
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult Edit(int id, Team requestTeam)
         {
             try
@@ -130,15 +148,23 @@ namespace Proiect.Controllers
                 if (ModelState.IsValid)
                 {
                     Team team = db.Teams.Find(id);
-                    if (TryUpdateModel(team))
+                    if (team.UserId == User.Identity.GetUserId() || User.IsInRole("Admin"))
                     {
-                        team.TeamName = requestTeam.TeamName;
-                        db.SaveChanges();
-                        TempData["message"] = "Editarea echipei a fost efectuata cu succes!";
-                        return RedirectToAction("Index");
+                        if (TryUpdateModel(team))
+                        {
+                            team.TeamName = requestTeam.TeamName;
+                            db.SaveChanges();
+                            TempData["message"] = "Editarea echipei a fost efectuata cu succes!";
+                            return Redirect("/Home/Index");
+                        }
+                        else
+                            return View(requestTeam);
                     }
                     else
-                        return View(requestTeam);
+                    {
+                        TempData["message"] = "Nu aveti dreptul sa modificati aceasta echipa";
+                        return Redirect("/Home/Index");
+                    }
                 }
                 else
                     return View(requestTeam);
@@ -150,18 +176,27 @@ namespace Proiect.Controllers
         }
 
         [HttpDelete]
-        [Authorize(Roles = "Organiser,Admin")]
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult Delete(int id)
         {
             Team team = db.Teams.Find(id);
-            db.Teams.Remove(team);
-            db.SaveChanges();
-            TempData["message"] = "Echipa a fost stearsa!";
-            return RedirectToAction("Index");
+            if (team.UserId == User.Identity.GetUserId() || User.IsInRole("Admin"))
+            {
+                db.Teams.Remove(team);
+                db.SaveChanges();
+                TempData["message"] = "Echipa a fost stearsa!";
+                return Redirect("/Home/Index");
+            }
+            else
+            {
+                TempData["message"] = "Nu aveti dreptul sa stergeti aceasta echipa";
+                return Redirect("/Home/Index");
+            }
+
         }
 
         [HttpGet]
-        [Authorize(Roles = "Organiser,Admin")]
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult NewMember(string TeamId)
         {
             Team team = db.Teams.Find(Convert.ToInt32(TeamId));
@@ -226,7 +261,7 @@ namespace Proiect.Controllers
             return selectList;
         }
         [HttpPost]
-        [Authorize(Roles = "Organiser,Admin")]
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult NewMember(string UserId, int TeamId, string RUser)
         {
             var query = from x in db.Users
@@ -265,6 +300,8 @@ namespace Proiect.Controllers
             }
 
         }
+
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult DeleteMember(string UserId, string TeamId)
         {
 
@@ -276,6 +313,12 @@ namespace Proiect.Controllers
                 var temp1 = from x in db.TeamUsers
                             where (x.Id == UserId && x.TeamId == aux)
                             select x;
+                var tasks = db.Tasks;
+                foreach(var elem in tasks)
+                {
+                    if (elem.WorkerId == UserId && elem.Project.TeamId == aux)
+                        elem.WorkerId = null;
+                }
                 //TeamUser temp1 = db.TeamUsers.Find(UserId, TeamId);
                 foreach (var elem in temp1)
                 {
@@ -319,6 +362,7 @@ namespace Proiect.Controllers
             }
             return listOfUsers;
         }
+        
 
     }
 }

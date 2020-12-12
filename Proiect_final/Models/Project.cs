@@ -20,7 +20,6 @@ namespace Proiect.Models
         public string UserId { get; set; }
         public virtual ApplicationUser User { get; set; }
 
-        [Required(ErrorMessage = "Echipa este obligatorie")]
         public int TeamId { get; set; }
         public virtual Team Team { get; set; }
 
