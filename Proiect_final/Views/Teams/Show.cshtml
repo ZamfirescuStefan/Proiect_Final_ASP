@@ -3,39 +3,48 @@
 @{
     ViewBag.Title = Model.TeamName.ToString();
 }
-
-<h1>Echipa @Model.TeamName</h1>
-
 <h2>@ViewBag.Message</h2>
+<h1>Echipa @Model.TeamName</h1>
 @foreach (Proiect.Models.Project project in Model.Projects)
 {
     <a href="/Projects/Show/@project.ProjectId">@project.ProjectName</a>
-    <br/>
+    <br />
 }
-<br/>
-<br/>
-<hr/>
-
-<form method="post" action="/Teams/Delete/@Model.TeamId">
-    @Html.HttpMethodOverride(HttpVerbs.Delete)
-
-    <button class="btn btn-danger" type="submit">Sterge echipa</button>
-</form>
-<br/>
-<hr/>
+<br />
+<br />
 <form method="get" action="/Teams/NewMember/@Model.TeamId">
     <input type="hidden" id="TeamId" name="TeamId" value="@Model.TeamId"><br>
     <button class="btn btn-info" type="submit">Adauga membru</button>
 </form>
+<hr />
 <br />
-<a href="/Teams/Edit/@Model.TeamId" class="btn btn-default" style="background-color:aquamarine">Editeaza echipa</a>
-<br/>
-<br/>
-<br/>
-@foreach (var elem in ViewBag.Members)
-{
-    <p>@elem.UserName</p>
-}
-<br/>
-<hr/>
+<h2>Membrii acestei echipe </h2>
+<ul class="list-group">
+    @foreach (var elem in ViewBag.Members)
+    {
+
+        <li class="list-group-item">
+            <div>
+                <p class="pull-left">@elem.UserName</p>
+                <a class="btn btn-danger pull-right" href="/Teams/DeleteMember/@elem.Id/@Model.TeamId"><span class="glyphicon glyphicon-trash"></span> &nbsp Sterge membrul </a>
+            </div>
+            <div class="clearfix"></div>
+
+        </li>
+    }
+</ul>
+<div>
+
+    <form class="pull-left" method="post" style="margin-right:39px" action="/Teams/Delete/@Model.TeamId">
+        @Html.HttpMethodOverride(HttpVerbs.Delete)
+
+        <button class="btn btn-danger" type="submit">Sterge echipa</button>
+    </form>
+
+    <a href="/Teams/Edit/@Model.TeamId" class="pull-left btn btn-default" style="background-color:aquamarine">Editeaza echipa</a>
+    <div class="clearfix"></div>
+</div>
+
+<br />
+<hr />
 <a href="/Teams/Index" class="btn btn-default">Inapoi la lista echipelor</a>

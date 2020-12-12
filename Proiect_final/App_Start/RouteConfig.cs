@@ -18,6 +18,11 @@ namespace Proiect_final
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
             );
+            routes.MapRoute(
+                name: "DeleteMembers",
+                url: "{controller}/{action}/{UserId}/{TeamId}",
+                defaults: new { controller = "Home", action = "Index", UserId = UrlParameter.Optional, TeamId   = UrlParameter.Optional }
+            );
         }
     }
 }

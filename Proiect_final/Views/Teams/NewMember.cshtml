@@ -1,18 +1,20 @@
 ﻿@model Proiect.Models.Team
 @{
-    ViewBag.Title = "NewMember";
+                /**/
+
+                ViewBag.Title = "NewMember";
 }
 <h2>NewMember</h2>
-@using (Html.BeginForm(actionName: "NewMember", controllerName: "Teams", routeValues: new { UserId = Model.UserId, TeamId = Model.TeamId}))
+@using (Html.BeginForm(actionName: "NewMember", controllerName: "Teams", routeValues: new { UserId = Model.UserId, TeamId = Model.TeamId }))
 {
     <br />
     @Html.HiddenFor(m => m.UserId)
     @Html.HiddenFor(m => m.TeamId)
     <br />
 
-    <h1>Test afisare</h1>
+    <h1>Adauga un membru</h1>
     <select name="Ruser">
-        @foreach (var elem in ViewBag.query)
+        @foreach (var elem in ViewBag.UnusedUser)
         {
             <option value="@elem.Id">
                 @elem.UserName
@@ -20,6 +22,7 @@
         }
     </select>
 
+    <br />
     <br />
 
     <button class="btn btn-default" type="submit">Adaugati membrul</button>

@@ -28,7 +28,7 @@ namespace Proiect.Controllers
         }
 
         [HttpGet]
-        // [Authorize(Roles = "Member,Organiser,Admin")]
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult Show(int id)
         {
             Team team = db.Teams.Find(id);
@@ -55,7 +55,7 @@ namespace Proiect.Controllers
             return toShow;
         }
         [HttpGet]
-        // [Authorize(Roles = "Member,Organiser,Admin")]
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult New()
         {
             Team team = new Team();
@@ -64,7 +64,7 @@ namespace Proiect.Controllers
         }
 
         [HttpPost]
-        //[Authorize(Roles = "Member,Organiser,Admin")]
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult New(Team team)
         {
             try
@@ -143,13 +143,12 @@ namespace Proiect.Controllers
         public ActionResult NewMember(string TeamId)
         {
             Team team = db.Teams.Find(Convert.ToInt32(TeamId));
-            var query = from x in db.Users
-                        select x;
-            ViewBag.query = query;
+
+            ViewBag.UnusedUser = UnusedUser(team.TeamId);
             if (User.Identity.GetUserId() == team.UserId || User.IsInRole("Admin"))
             {
-                
-                team.Members = GetAllMembers(team);
+
+                //team.Members = GetAllMembers(team);
                 return View(team);
             }
             else
@@ -157,6 +156,25 @@ namespace Proiect.Controllers
                 TempData["message"] = "Nu aveti permisiune sa adaugati membri";
                 return Redirect("/Teams/" + TeamId);
             }
+        }
+        private List<ApplicationUser> UnusedUser(int teamId)
+        {
+            var query = from x in db.Users
+                        select x;
+            List<ApplicationUser> listOfUsers = new List<ApplicationUser>();
+            foreach (var elem in query)
+            {
+                listOfUsers.Add(elem);
+            }
+            foreach (var pair in db.TeamUsers)
+            {
+                foreach (var elem in query)
+                {
+                    if (pair.Id == elem.Id && pair.TeamId == teamId)
+                        listOfUsers.Remove(elem);
+                }
+            }
+            return listOfUsers;
         }
         [NonAction]
         public IEnumerable<SelectListItem> GetAllMembers(Team team)
@@ -174,17 +192,17 @@ namespace Proiect.Controllers
                 });
 
             }
-            /*foreach (var elem in team.Users)
+            foreach (var elem in db.TeamUsers)
             {
                 foreach (var member in selectList)
                 {
-                    if (elem.Id == member.Value)
+                    if (elem.Id == member.Value && elem.TeamId == team.TeamId)
                     {
                         selectList.Remove(member);
                         break;
                     }
                 }
-            }*/
+            }
             return selectList;
         }
         [HttpPost]
@@ -227,5 +245,32 @@ namespace Proiect.Controllers
             }
 
         }
+        public ActionResult DeleteMember(string UserId, string TeamId)
+        {
+
+            Team team = db.Teams.Find(Convert.ToInt32(TeamId));
+
+            if (User.Identity.GetUserId() == team.UserId || User.IsInRole("Admin"))
+            {
+                int aux = Convert.ToInt32(TeamId);
+                var temp1 = from x in db.TeamUsers
+                            where (x.Id == UserId && x.TeamId == aux)
+                            select x;
+                //TeamUser temp1 = db.TeamUsers.Find(UserId, TeamId);
+                foreach (var elem in temp1)
+                {
+                    db.TeamUsers.Remove(elem);
+                }
+                db.SaveChanges();
+                TempData["message"] = "Membrul a fost sters!";
+                return Redirect("/Teams/Show/" + TeamId);
+            }
+            else
+            {
+                TempData["message"] = "Nu aveti dreptul sa stergeti acest user ";
+                return Redirect("/Teams/Show/" + TeamId);
+            }
+        }
+
     }
 }
