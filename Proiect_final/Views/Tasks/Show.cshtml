@@ -1,13 +1,10 @@
 ﻿@model Proiect.Models.Task
-
 @{
     ViewBag.Title = Model.TaskName;
 }
-
 <h1>@ViewBag.Message</h1>
 <br />
 <hr />
-
 <h1>@Model.TaskName</h1>
 <br />
 <hr />
@@ -25,14 +22,32 @@
 <h3>@Model.Project.ProjectName</h3>
 <br />
 <hr />
+@if (Model.WorkerId != null)
+{
+    <h3>Utilizatorul @ViewBag.WorkerName</h3>
+}
 
+@if (Model.WorkerId == null)
+{
+    <h3> Nu lucreaza nimeni la acest task </h3>
+}
+
+<br />
 @if ((ViewBag.afisareButoane == true && Model.UserId == ViewBag.currentUser) || ViewBag.isAdmin)
 {
+    if (Model.WorkerId == null)
+    {
+        <a class="btn btn-default" href="/Tasks/AddWorker/@Model.TaskId">Asigneaza un utilizator pentru acest task </a>
+    }
+    if (Model.WorkerId != null)
+    {
+        <a class="btn btn-default" href="/Tasks/AddWorker/@Model.TaskId">Schimba utilizatorul pentru acest task </a>
+
+    }
     <br />
     <hr />
     <form method="post" action="/Tasks/Delete/@Model.TaskId">
         @Html.HttpMethodOverride(HttpVerbs.Delete)
-
         <button type="submit" class="btn btn-danger">Sterge taskul</button>
     </form>
     <hr />
@@ -42,7 +57,6 @@
     <hr />
 }
 <a class="btn btn-default" href="/Tasks/Index">Inapoi la lista taskurilor</a>
-
 
 @foreach (var comm in @Model.Comments)
 {

@@ -1,0 +1,22 @@
+﻿
+@{
+    ViewBag.Title = "AddWorker";
+}
+
+<h2>AddWorker</h2>
+<form method="post" action="/Tasks/AddWorker/@ViewBag.TaskId">
+    <select name="WorkerId">
+        @foreach (var elem in ViewBag.listOfUsers)
+        {
+            if (elem.Id != ViewBag.WorkerId)
+            {
+                <option value="@elem.Id">
+                    @elem.UserName
+                </option>
+            }
+
+        }
+    </select>
+    <button type="submit"> Adauga membrul</button>
+
+</form>

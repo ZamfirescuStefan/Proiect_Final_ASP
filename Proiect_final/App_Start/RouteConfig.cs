@@ -21,8 +21,9 @@ namespace Proiect_final
             routes.MapRoute(
                 name: "DeleteMembers",
                 url: "{controller}/{action}/{UserId}/{TeamId}",
-                defaults: new { controller = "Home", action = "Index", UserId = UrlParameter.Optional, TeamId   = UrlParameter.Optional }
+                defaults: new { controller = "Home", action = "Index", UserId = UrlParameter.Optional, TeamId = UrlParameter.Optional }
             );
+
         }
     }
 }

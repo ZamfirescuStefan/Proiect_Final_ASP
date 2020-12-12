@@ -14,15 +14,23 @@ namespace Proiect.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         [HttpGet]
-        [Authorize(Roles = "Member,Organiser,Admin")]
+        [Authorize(Roles = "Admin")]
         public ActionResult Index()
         {
-            ViewBag.Tasks = db.Tasks;
-            if (TempData.ContainsKey("message"))
+            if (User.IsInRole("Admin"))
             {
-                ViewBag.Message = TempData["message"];
+                ViewBag.Tasks = db.Tasks;
+                if (TempData.ContainsKey("message"))
+                {
+                    ViewBag.Message = TempData["message"];
+                }
+                return View();
             }
-            return View();
+            else
+            {
+                TempData["message"] = "Nu aveti dreptul de a accesa ruta";
+                return Redirect("/Home/Index");
+            }
         }
 
         [HttpGet]
@@ -30,17 +38,36 @@ namespace Proiect.Controllers
         public ActionResult Show(int id)
         {
             Task task = db.Tasks.Find(id);
+            List<ApplicationUser> list = listUsersOfTeam(task.ProjectId);
+            bool ok = false;
+            foreach (var elem in list)
+            {
+                if (elem.Id == User.Identity.GetUserId())
+                {
+                    ok = true;
+                    break;
+                }
+            }
             if (TempData.ContainsKey("message"))
             {
                 ViewBag.Message = TempData["message"];
             }
-            setAccessRights();
-
-            return View(task);
+            if (User.IsInRole("Admin") || ok)
+            {
+                if (task.WorkerId != null)
+                    ViewBag.WorkerName = db.Users.Find(task.WorkerId).UserName;
+                setAccessRights();
+                return View(task);
+            }
+            else
+            {
+                TempData["message"] = "Nu ai permisiunea sa vizualizezi acest task ";
+                return Redirect("/Home/Index");
+            }
         }
 
         [HttpGet]
-        [Authorize(Roles = "Member,Organiser,Admin")]
+        [Authorize(Roles = "Organiser,Admin")]
         public ActionResult New(string ProiectId)
         {
             int ProjId = Convert.ToInt32(ProiectId);
@@ -197,6 +224,7 @@ namespace Proiect.Controllers
             }
         }
 
+        [NonAction]
         private void setAccessRights()
         {
             ViewBag.afisareButoane = false;
@@ -207,10 +235,75 @@ namespace Proiect.Controllers
             ViewBag.isAdmin = User.IsInRole("Admin");
             ViewBag.currentUser = User.Identity.GetUserId();
         }
+        [NonAction]
         private string GetUserIdFromProjectId (int id)
         {
             Project proiect = db.Projects.Find(id);
             return proiect.UserId;
         }
+
+        [Authorize(Roles = "Organiser,Admin")]
+        public ActionResult AddWorker (int id)
+        {
+            Task task = db.Tasks.Find(id);
+            if (User.Identity.GetUserId() == task.UserId || User.IsInRole("Admin"))
+            {
+                List<ApplicationUser> list = listUsersOfTeam(task.ProjectId);
+                ViewBag.WorkerId = task.WorkerId;
+                ViewBag.TaskId = task.TaskId;
+                ViewBag.listOfUsers = list;
+                return View();
+            }
+            else
+            {
+                TempData["message"] = "Nu aveti dreptul sa efectuati aceasta modificare";
+                return Redirect("/Tasks/Show/" + id.ToString());
+            }
+        }
+        [HttpPost]
+        [Authorize(Roles = "Organiser,Admin")]
+        public ActionResult AddWorker (int id, string WorkerId)
+        {
+            Task task = db.Tasks.Find(id);
+            ViewBag.TaskId = task.TaskId;
+
+            ViewBag.listOfUsers = listUsersOfTeam(task.ProjectId);
+            try
+            {
+                if (User.Identity.GetUserId() == task.UserId || User.IsInRole("Admin"))
+                {
+                    task.WorkerId = WorkerId;
+                    db.SaveChanges();
+                    TempData["message"] = "Taskul a fost asignat cu succes";
+                    return Redirect("/Tasks/Show/" + id.ToString());
+                }
+                else
+                {
+                    TempData["message"] = "Nu aveti dreptul sa efectuati aceasta modificare";
+                    return Redirect("/Tasks/Show/" + id.ToString());
+                }
+            }
+            catch (Exception e)
+            {
+                return View();
+            }
+        }
+        [NonAction]
+        private List<ApplicationUser> listUsersOfTeam (int ProjectId)
+        {
+            List<ApplicationUser> listofUsr = new List<ApplicationUser>();
+            Project project = db.Projects.Find(ProjectId);
+            var list = from x in db.TeamUsers
+                       where x.TeamId == project.TeamId
+                       select x;
+            foreach (var elem in list)
+            {
+                ApplicationUser auxUser = db.Users.Find(elem.Id);
+                listofUsr.Add(auxUser);
+            }
+
+            return listofUsr;
+        }
+
     }
 }

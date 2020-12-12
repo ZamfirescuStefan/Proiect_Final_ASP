@@ -32,18 +32,40 @@ namespace Proiect.Controllers
         public ActionResult Show(int id)
         {
             Team team = db.Teams.Find(id);
-
-            ViewBag.Members = UsersToShow(id);
-            if (TempData.ContainsKey("message"))
+            setAccessRights();
+            List<ApplicationUser> listUsers = ListTeamUser(team.TeamId);
+            bool ok = false;
+            foreach (var elem in listUsers)
             {
-                ViewBag.Message = TempData["message"];
+                if (elem.Id == User.Identity.GetUserId())
+                {
+                    ok = true;
+                    break;
+                }
             }
-            return View(team);
+
+            if (User.IsInRole("Admin") || ok)
+            {
+                ViewBag.Manager = db.Users.Find(team.UserId);
+                ViewBag.Members = UsersToShow(id);
+                if (TempData.ContainsKey("message"))
+                {
+                    ViewBag.Message = TempData["message"];
+                }
+                return View(team);
+            }
+            else
+            {
+                TempData["message"] = "Nu faceti parte din aceasta echipa";
+                return Redirect("/Projects/Index");
+            }   
         }
-        List<ApplicationUser> UsersToShow(int id)
+        private List<ApplicationUser> UsersToShow(int id)
         {
+            Team team = db.Teams.Find(id);
+            string manager = team.UserId;
             var obj = from x in db.TeamUsers
-                      where x.TeamId == id
+                      where x.TeamId == id && x.Id != manager
                       select x;
             List<ApplicationUser> toShow = new List<ApplicationUser>();
             foreach (var elem in obj)
@@ -55,7 +77,7 @@ namespace Proiect.Controllers
             return toShow;
         }
         [HttpGet]
-        [Authorize(Roles = "Member,Organiser,Admin")]
+        [Authorize(Roles = "Organiser,Admin")]
         public ActionResult New()
         {
             Team team = new Team();
@@ -64,7 +86,7 @@ namespace Proiect.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Member,Organiser,Admin")]
+        [Authorize(Roles = "Organiser,Admin")]
         public ActionResult New(Team team)
         {
             try
@@ -147,8 +169,6 @@ namespace Proiect.Controllers
             ViewBag.UnusedUser = UnusedUser(team.TeamId);
             if (User.Identity.GetUserId() == team.UserId || User.IsInRole("Admin"))
             {
-
-                //team.Members = GetAllMembers(team);
                 return View(team);
             }
             else
@@ -270,6 +290,34 @@ namespace Proiect.Controllers
                 TempData["message"] = "Nu aveti dreptul sa stergeti acest user ";
                 return Redirect("/Teams/Show/" + TeamId);
             }
+        }
+        [NonAction]
+        private void setAccessRights()
+        {
+            ViewBag.afisareButoane = false;
+            if (User.IsInRole("Organiser") || User.IsInRole("Admin"))
+            {
+                ViewBag.afisareButoane = true;
+            }
+            ViewBag.isAdmin = User.IsInRole("Admin");
+            ViewBag.currentUser = User.Identity.GetUserId();
+        }
+
+        [NonAction]
+        private List<ApplicationUser> ListTeamUser(int teamId)
+        {
+            var query = from x in db.Users
+                        select x;
+            List<ApplicationUser> listOfUsers = new List<ApplicationUser>();
+            foreach (var pair in db.TeamUsers)
+            {
+                foreach (var elem in query)
+                {
+                    if ( pair.Id == elem.Id && pair.TeamId == teamId)
+                        listOfUsers.Add(elem);
+                }
+            }
+            return listOfUsers;
         }
 
     }

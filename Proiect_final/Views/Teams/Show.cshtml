@@ -12,21 +12,33 @@
 }
 <br />
 <br />
-<form method="get" action="/Teams/NewMember/@Model.TeamId">
-    <input type="hidden" id="TeamId" name="TeamId" value="@Model.TeamId"><br>
-    <button class="btn btn-info" type="submit">Adauga membru</button>
-</form>
+@if ((ViewBag.afisareButoane == true && Model.UserId == ViewBag.currentUser) || ViewBag.isAdmin)
+{
+    <form method="get" action="/Teams/NewMember/@Model.TeamId">
+        <input type="hidden" id="TeamId" name="TeamId" value="@Model.TeamId"><br>
+        <button class="btn btn-info" type="submit">Adauga membru</button>
+    </form>
 <hr />
+}
+
 <br />
-<h2>Membrii acestei echipe </h2>
+<br />
+<br />
+<h2> Membrii acestei echipe</h2>
+<br />
+<h3 class="list-group-item">Organizatorul echipei: @ViewBag.Manager.UserName</h3>
+<br />
 <ul class="list-group">
     @foreach (var elem in ViewBag.Members)
     {
-
         <li class="list-group-item">
             <div>
                 <p class="pull-left">@elem.UserName</p>
-                <a class="btn btn-danger pull-right" href="/Teams/DeleteMember/@elem.Id/@Model.TeamId"><span class="glyphicon glyphicon-trash"></span> &nbsp Sterge membrul </a>
+                @if ((ViewBag.afisareButoane == true && Model.UserId == ViewBag.currentUser) || ViewBag.isAdmin)
+                {
+                    <a class="btn btn-danger pull-right" href="/Teams/DeleteMember/@elem.Id/@Model.TeamId"><span class="glyphicon glyphicon-trash"></span> &nbsp Sterge membrul </a>
+
+                }
             </div>
             <div class="clearfix"></div>
 
@@ -34,15 +46,17 @@
     }
 </ul>
 <div>
+    @if ((ViewBag.afisareButoane == true && Model.UserId == ViewBag.currentUser) || ViewBag.isAdmin)
+    {
+        <form class="pull-left" method="post" style="margin-right:39px" action="/Teams/Delete/@Model.TeamId">
+            @Html.HttpMethodOverride(HttpVerbs.Delete)
 
-    <form class="pull-left" method="post" style="margin-right:39px" action="/Teams/Delete/@Model.TeamId">
-        @Html.HttpMethodOverride(HttpVerbs.Delete)
+            <button class="btn btn-danger" type="submit">Sterge echipa</button>
+        </form>
 
-        <button class="btn btn-danger" type="submit">Sterge echipa</button>
-    </form>
-
-    <a href="/Teams/Edit/@Model.TeamId" class="pull-left btn btn-default" style="background-color:aquamarine">Editeaza echipa</a>
-    <div class="clearfix"></div>
+        <a href="/Teams/Edit/@Model.TeamId" class="pull-left btn btn-default" style="background-color:aquamarine">Editeaza echipa</a>
+        <div class="clearfix"></div>
+    }
 </div>
 
 <br />

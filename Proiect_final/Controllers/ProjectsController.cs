@@ -44,7 +44,7 @@ namespace Proiect.Controllers
             {
                 ViewBag.Message = TempData["message"];
             }
-            setAccessRights();
+            setAccessRights(project.UserId);
 
             if(TempData.ContainsKey("message"))
             {
@@ -225,7 +225,8 @@ namespace Proiect.Controllers
                 return RedirectToAction("Index");
             }
         }
-        private void setAccessRights()
+        [NonAction]
+        private void setAccessRights(string userId)
         {
             ViewBag.afisareButoane = false;
             if (User.IsInRole("Organiser") || User.IsInRole("Admin"))
