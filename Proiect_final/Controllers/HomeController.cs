@@ -16,18 +16,17 @@ namespace Proiect_final.Controllers
 
         public ActionResult Index()
         {
-
+            
             if (TempData.ContainsKey("message"))
             {
-                ViewBag.Mesage = TempData["message"];
+                ViewBag.Message = TempData["message"];
             }
             string UserId = User.Identity.GetUserId();
             ViewBag.Teams = listTeams(UserId);
             ViewBag.Projects = listProjects(UserId);
+            ViewBag.IsAdmin = User.IsInRole("Admin");
             return View();
-
         }
-
         public ActionResult About()
         {
             ViewBag.Message = "Your application description page.";
@@ -42,26 +41,25 @@ namespace Proiect_final.Controllers
             return View();
         }
         [NonAction]
-        private List<Project> listProjects (string UserId)
+        private List<Project> listProjects(string UserId)
         {
             List<Project> list = new List<Project>();
             List<Team> listTeam = listTeams(UserId);
             var query = from x in db.Projects
-                        where x.UserId == UserId
                         select x;
-            foreach(var project in query)
+            foreach (var project in query)
             {
-                foreach(var elem in listTeam)
+                foreach (var elem in listTeam)
                 {
                     if (elem.TeamId == project.TeamId)
 
                         list.Add(project);
-                } 
+                }
             }
             return list;
         }
         [NonAction]
-        private List <Team> listTeams (string UserId)
+        private List<Team> listTeams(string UserId)
         {
             List<Team> list = new List<Team>();
             var query = from x in db.TeamUsers

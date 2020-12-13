@@ -34,7 +34,42 @@ namespace Proiect.Controllers
                 return Redirect("/Home/Index");
             }
         }
-
+        [HttpGet]
+        [Authorize(Roles = "Member,Organiser,Admin")]
+        public ActionResult NewTeam()
+        {
+            Team team = new Team();
+            team.UserId = User.Identity.GetUserId();
+            return View(team);
+        }
+        [HttpPost]
+        [Authorize(Roles = "Member,Organiser,Admin")]
+        public ActionResult NewTeam(Team team)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var user = db.Users.Find(User.Identity.GetUserId());
+                    TeamUser tu = new TeamUser();
+                    tu.Id = user.Id;
+                    tu.TeamId = team.TeamId;
+                    db.TeamUsers.Add(tu);
+                    db.Teams.Add(team);
+                    db.SaveChanges();
+                    TempData["message"] = "Echipa a fost adaugata!";
+                    return Redirect("/Projects/New");
+                }
+                else
+                {
+                    return View(team);
+                }
+            }
+            catch (Exception e)
+            {
+                return View(team);
+            }
+        }
         [HttpGet]
         [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult Show(int id)
@@ -68,6 +103,7 @@ namespace Proiect.Controllers
                 return Redirect("/Projects/Index");
             }   
         }
+
         private List<ApplicationUser> UsersToShow(int id)
         {
             Team team = db.Teams.Find(id);

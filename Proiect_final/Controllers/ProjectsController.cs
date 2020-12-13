@@ -52,7 +52,7 @@ namespace Proiect.Controllers
             }
             return View(project);
         }
-
+       
         [HttpGet]
         [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult New()
@@ -108,11 +108,11 @@ namespace Proiect.Controllers
             string currentUser = User.Identity.GetUserId(); 
             project.Echipe = GetAllTeams(currentUser);
             project.UserId = User.Identity.GetUserId();
+            project.TeamId = 0;
             try
             {
                 if (ModelState.IsValid)
                 { 
-                        
                     ApplicationUser user = db.Users.Find(project.UserId);
                     user.AllRoles = GetAllRoles();
                     var userRole = user.Roles.FirstOrDefault();
@@ -121,24 +121,26 @@ namespace Proiect.Controllers
                     var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(context));
                     var UserManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(context));
 
-                    if (TryUpdateModel(user))
+                    if (TryUpdateModel(project))
                     {
                         db.Projects.Add(project);
-                        if (!User.IsInRole("Admin"))
+                        if (!User.IsInRole("Organiser") && !User.IsInRole("Admin"))
                         {
                             var roles = from role in db.Roles select role;
                             foreach (var role in roles)
                             {
                                 UserManager.RemoveFromRole(project.UserId, role.Name);
-
                             }
                             var selectedRole = db.Roles.Find("Organiser");
 
                             UserManager.AddToRole(project.UserId, "Organiser");
+
                         }
                         db.SaveChanges();
+
                     }
-                    return RedirectToAction("Index");
+                    TempData["message"] = "Proiectul a fost adaugat cu succes";
+                    return Redirect("/Home/Index");
                 }
                 else
                     return View(project);
@@ -148,7 +150,40 @@ namespace Proiect.Controllers
                 return View(project);
             }
         }
-
+        [Authorize(Roles = "Member,Organiser,Admin")]
+        public ActionResult AddTeam() 
+        {
+                string currentUser = User.Identity.GetUserId();
+                ViewBag.Echipe = GetAllTeams(currentUser);
+                return View();
+        }
+        [HttpPut]
+        [Authorize(Roles = "Organiser,Admin")]
+        public ActionResult AddTeam (int TeamId, int ProjectId)
+        {
+            Project project = db.Projects.Find(ProjectId);
+            string currentUser = User.Identity.GetUserId();
+            ViewBag.Echipe = GetAllTeams(currentUser);
+            ViewBag.ProjectId = ProjectId;
+            if (project.UserId == User.Identity.GetUserId() || User.IsInRole("Admin"))
+            {
+                try
+                {
+                    project.TeamId = TeamId;
+                    db.SaveChanges();
+                    return Redirect("/Projects/Show/" + ProjectId.ToString());
+                }
+                catch (Exception e)
+                {
+                    return View();
+                }
+            }
+            else
+            {
+                TempData["message"] = "Nu aveti dreptul de a efectua aceasta actiune";
+                return Redirect("/Home/Index");
+            }
+        }
         [HttpGet]
         [Authorize(Roles = "Organiser,Admin")]
         public ActionResult Edit(int id)
@@ -206,7 +241,7 @@ namespace Proiect.Controllers
                 return View(requestProject);
             }
         }
-
+        
         [HttpDelete]
         [Authorize(Roles = "Organiser,Admin")]
         public ActionResult Delete(int id)
@@ -236,5 +271,6 @@ namespace Proiect.Controllers
             ViewBag.isAdmin = User.IsInRole("Admin");
             ViewBag.currentUser = User.Identity.GetUserId();
         }
+
     }
 }

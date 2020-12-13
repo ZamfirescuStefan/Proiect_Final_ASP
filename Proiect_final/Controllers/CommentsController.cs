@@ -1,4 +1,5 @@
-﻿using Proiect.Models;
+﻿using Microsoft.AspNet.Identity;
+using Proiect.Models;
 using Proiect_final.Models;
 using System;
 using System.Collections.Generic;
@@ -13,61 +14,88 @@ namespace Proiect.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         [HttpPost]
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult New(Comment comment)
         {
             try
             {
+                comment.UserId = User.Identity.GetUserId();
                 comment.Date = DateTime.Now;
                 db.Comments.Add(comment);
                 db.SaveChanges();
                 TempData["message"] = "Comentariul a fost adaugat!";
                 return Redirect("/Tasks/Show/" + comment.TaskId.ToString());
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return Redirect("/Tasks/Show/" + comment.TaskId.ToString());
             }
         }
-
         [HttpGet]
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult Edit(int id)
         {
             Comment comment = db.Comments.Find(id);
-            return View(comment);
+            if (comment.UserId == User.Identity.GetUserId() || User.IsInRole("Admin"))
+            {
+                return View(comment);
+            }
+            else
+            {
+                TempData["message"] = "Nu aveti dreptul de a edita acest comentariu";
+                return Redirect("/Tasks/Show/" + comment.TaskId.ToString());
+            }
         }
 
         [HttpPut]
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult Edit(int id, Comment requestComment)
         {
-            Comment comment = db.Comments.Find(id);
-            requestComment.Task = comment.Task;
             try
             {
-                if(TryUpdateModel(requestComment))
+                Comment comment = db.Comments.Find(id);
+                requestComment.Task = comment.Task;
+                if (User.IsInRole("Admin") || User.Identity.GetUserId() == comment.UserId)
                 {
-                    comment.CommentContent = requestComment.CommentContent;
-                    comment.Date = requestComment.Date;
-                    db.SaveChanges();
-                    TempData["message"] = "Comentariul a fost editat!";
+                    if (TryUpdateModel(requestComment))
+                    {
+                        comment.CommentContent = requestComment.CommentContent;
+                        comment.Date = requestComment.Date;
+                        db.SaveChanges();
+                        TempData["message"] = "Comentariul a fost editat!";
+                    }
                     return Redirect("/Tasks/Show/" + comment.TaskId.ToString());
                 }
-                return View(requestComment);
+                else
+                {
+                    TempData["message"] = "Nu aveti dreptul de a edita acest comentariu";
+                    return Redirect("/Tasks/Show/" + comment.TaskId.ToString());
+                }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return View(requestComment);
             }
         }
 
         [HttpDelete]
+        [Authorize(Roles = "Memer,Organiser,Admin")]
         public ActionResult Delete(int id)
         {
             Comment comment = db.Comments.Find(id);
             var x = comment.TaskId;
-            db.Comments.Remove(comment);
-            db.SaveChanges();
-            TempData["message"] = "Comentariul a fost sters!";
-            return Redirect("/Tasks/Show/" + x.ToString());
+            if (User.IsInRole("Admin") || comment.UserId == User.Identity.GetUserId())
+            {
+                db.Comments.Remove(comment);
+                db.SaveChanges();
+                TempData["message"] = "Comentariul a fost sters";
+                return Redirect("/Tasks/Show/" + x.ToString());
+            }
+            else
+            {
+                TempData["message"] = "Nu aveti dreptul de a sterge acest comentariu";
+                return Redirect("/Tasks/Show/" + x.ToString());
+            }
         }
     }
 }

@@ -67,15 +67,18 @@
                 <div>
                     <p>@comm.CommentContent</p> <small class="pull-right">@comm.Date</small>
                 </div>
-                <div style="display: inline-block; float : left; margin-right: 15px">
-                    <a class="glyphicon glyphicon-pencil" href="/Comments/Edit/@comm.CommentId"></a>
-                </div>
-                <div style="display: inline-block; float : left">
-                    <form method="post" action="/Comments/Delete/@comm.CommentId">
-                        @Html.HttpMethodOverride(HttpVerbs.Delete)
-                        <button class="glyphicon glyphicon-trash" style="border: none; background: transparent" type="submit"></button>
-                    </form>
-                </div>
+                @if (ViewBag.IsAdmin || comm.UserId == ViewBag.CurrentUser)
+                {
+                    <div style="display: inline-block; float : left; margin-right: 15px">
+                        <a class="glyphicon glyphicon-pencil" href="/Comments/Edit/@comm.CommentId"></a>
+                    </div>
+                    <div style="display: inline-block; float : left">
+                        <form method="post" action="/Comments/Delete/@comm.CommentId">
+                            @Html.HttpMethodOverride(HttpVerbs.Delete)
+                            <button class="glyphicon glyphicon-trash" style="border: none; background: transparent" type="submit"></button>
+                        </form>
+                    </div>
+                }
                 <div class="col-md-2"></div>
             </div>
         </div>
@@ -92,6 +95,7 @@
                     <div class="panel-body">
                         <input type="hidden" name="TaskId" value="@Model.TaskId" />
                         <input type="hidden" name="Date" value="@DateTime.Now" />
+                        <input type="hidden" name="UserId" value="@Model.UserId" />
                         <label>Continut comentariu</label>
                         <br />
                         <textarea class="form-control" name="CommentContent"></textarea>
