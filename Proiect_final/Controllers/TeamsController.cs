@@ -16,24 +16,22 @@ namespace Proiect.Controllers
 
         // GET: Teams
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult Index()
         {
-            ViewBag.Teams = db.Teams;
-            if (TempData.ContainsKey("message"))
-            {
-                ViewBag.Message = TempData["message"];
-            }
+            ViewBag.Teams = db.Teams.OrderBy(m => m.TeamName);
             if ( User.IsInRole("Admin"))
             {
                 return View();
             }
             else
             {
-                TempData["message"] = "Nu aveti dreptul sa vizualizati toate echipele";
+                TempData["message"] = "Nu aveti dreptul sa vizualizati aceasta pagina!";
+                TempData["status"] = "danger";
                 return Redirect("/Home/Index");
             }
         }
+
         [HttpGet]
         [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult NewTeam()
@@ -42,6 +40,7 @@ namespace Proiect.Controllers
             team.UserId = User.Identity.GetUserId();
             return View(team);
         }
+
         [HttpPost]
         [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult NewTeam(Team team)
@@ -58,6 +57,7 @@ namespace Proiect.Controllers
                     db.Teams.Add(team);
                     db.SaveChanges();
                     TempData["message"] = "Echipa a fost adaugata!";
+                    TempData["status"] = "success";
                     return Redirect("/Projects/New");
                 }
                 else
@@ -70,12 +70,13 @@ namespace Proiect.Controllers
                 return View(team);
             }
         }
+
         [HttpGet]
         [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult Show(int id)
         {
             Team team = db.Teams.Find(id);
-            setAccessRights();
+            setAccessRights(team);
             List<ApplicationUser> listUsers = ListTeamUser(team.TeamId);
             bool ok = false;
             foreach (var elem in listUsers)
@@ -91,16 +92,13 @@ namespace Proiect.Controllers
             {
                 ViewBag.Manager = db.Users.Find(team.UserId);
                 ViewBag.Members = UsersToShow(id);
-                if (TempData.ContainsKey("message"))
-                {
-                    ViewBag.Message = TempData["message"];
-                }
                 return View(team);
             }
             else
             {
-                TempData["message"] = "Nu faceti parte din aceasta echipa";
-                return Redirect("/Projects/Index");
+                TempData["message"] = "Nu faceti parte din aceasta echipa!";
+                TempData["status"] = "danger";
+                return Redirect("/Home/Index");
             }   
         }
 
@@ -116,10 +114,10 @@ namespace Proiect.Controllers
             {
                 ApplicationUser user = db.Users.Find(elem.Id);
                 toShow.Add(user);
-
             }
             return toShow;
         }
+
         [HttpGet]
         [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult New()
@@ -145,6 +143,7 @@ namespace Proiect.Controllers
                     db.Teams.Add(team);
                     db.SaveChanges();
                     TempData["message"] = "Echipa a fost adaugata!";
+                    TempData["status"] = "success";
                     return Redirect("/Home/Index");
                 }
                 else
@@ -169,7 +168,8 @@ namespace Proiect.Controllers
             }
             else
             {
-                TempData["message"] = "Nu aveti dreptul sa modificati aceasta echipa";
+                TempData["message"] = "Nu aveti dreptul sa editati aceasta echipa!";
+                TempData["status"] = "danger";
                 return Redirect("/Home/Index"); 
             }
 
@@ -191,14 +191,16 @@ namespace Proiect.Controllers
                             team.TeamName = requestTeam.TeamName;
                             db.SaveChanges();
                             TempData["message"] = "Editarea echipei a fost efectuata cu succes!";
-                            return Redirect("/Home/Index");
+                            TempData["status"] = "warning";
+                            return Redirect("/Teams/Show/" + team.TeamId.ToString());
                         }
                         else
                             return View(requestTeam);
                     }
                     else
                     {
-                        TempData["message"] = "Nu aveti dreptul sa modificati aceasta echipa";
+                        TempData["message"] = "Nu aveti dreptul sa editati aceasta echipa!";
+                        TempData["status"] = "danger";
                         return Redirect("/Home/Index");
                     }
                 }
@@ -221,11 +223,13 @@ namespace Proiect.Controllers
                 db.Teams.Remove(team);
                 db.SaveChanges();
                 TempData["message"] = "Echipa a fost stearsa!";
+                TempData["status"] = "warning";
                 return Redirect("/Home/Index");
             }
             else
             {
-                TempData["message"] = "Nu aveti dreptul sa stergeti aceasta echipa";
+                TempData["message"] = "Nu aveti dreptul sa stergeti aceasta echipa!";
+                TempData["status"] = "danger";
                 return Redirect("/Home/Index");
             }
 
@@ -244,10 +248,13 @@ namespace Proiect.Controllers
             }
             else
             {
-                TempData["message"] = "Nu aveti permisiune sa adaugati membri";
-                return Redirect("/Teams/" + TeamId);
+                TempData["message"] = "Nu aveti permisiunea sa adaugati un membru!";
+                TempData["status"] = "danger";
+                return Redirect("/Home/Index");
             }
         }
+
+        [NonAction]
         private List<ApplicationUser> UnusedUser(int teamId)
         {
             var query = from x in db.Users
@@ -267,6 +274,7 @@ namespace Proiect.Controllers
             }
             return listOfUsers;
         }
+
         [NonAction]
         public IEnumerable<SelectListItem> GetAllMembers(Team team)
         {
@@ -296,6 +304,7 @@ namespace Proiect.Controllers
             }
             return selectList;
         }
+
         [HttpPost]
         [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult NewMember(string UserId, int TeamId, string RUser)
@@ -317,6 +326,7 @@ namespace Proiect.Controllers
                         db.TeamUsers.Add(tu);
                         db.SaveChanges();
                         TempData["message"] = "Membrul a fost adaugat!";
+                        TempData["status"] = "warning";
                         return RedirectToAction("/Show/" + TeamId.ToString());
                     }
                     else
@@ -326,8 +336,9 @@ namespace Proiect.Controllers
                 }
                 else
                 {
-                    TempData["message"] = "Nu aveti dreptul de a adauga un membru in aceasta echipa";
-                    return Redirect("/Projects/Index");
+                    TempData["message"] = "Nu aveti dreptul de a adauga un membru in aceasta echipa!";
+                    TempData["status"] = "danger";
+                    return Redirect("/Home/Index");
                 }
             }
             catch (Exception e)
@@ -362,19 +373,22 @@ namespace Proiect.Controllers
                 }
                 db.SaveChanges();
                 TempData["message"] = "Membrul a fost sters!";
+                TempData["status"] = "warning";
                 return Redirect("/Teams/Show/" + TeamId);
             }
             else
             {
-                TempData["message"] = "Nu aveti dreptul sa stergeti acest user ";
-                return Redirect("/Teams/Show/" + TeamId);
+                TempData["message"] = "Nu aveti dreptul sa stergeti acest user!";
+                TempData["status"] = "danger";
+                return Redirect("/Home/Index");
             }
         }
+
         [NonAction]
-        private void setAccessRights()
+        private void setAccessRights(Team team)
         {
             ViewBag.afisareButoane = false;
-            if (User.IsInRole("Organiser") || User.IsInRole("Admin"))
+            if (team.UserId == User.Identity.GetUserId() || User.IsInRole("Admin"))
             {
                 ViewBag.afisareButoane = true;
             }
@@ -398,7 +412,34 @@ namespace Proiect.Controllers
             }
             return listOfUsers;
         }
-        
 
+        [HttpGet]
+        [Authorize(Roles = "Member,Organiser,Admin")]
+        public ActionResult Search(string TeamId)
+        {
+            var search = "";
+            var aux = Convert.ToInt32(TeamId);
+            var team = db.Teams.Find(aux);
+            ViewBag.UnusedUser = UnusedUser(team.TeamId);
+            List<ApplicationUser> UnuserdUsers = UnusedUser(team.TeamId);
+
+            if (Request.Params.Get("search") != null)
+            {
+                search = Request.Params.Get("search").Trim();
+                List<ApplicationUser> UsersList = new List<ApplicationUser>();
+                foreach (var elem in UnuserdUsers)
+                {
+                    if (elem.UserName.Contains(search))
+                    {
+                        UsersList.Add(elem);
+                    }
+                }
+                ViewBag.UsersList = UsersList;
+            }
+
+            var teamId = db.Teams.Find(aux);
+            return View(teamId);
+
+        }
     }
 }

@@ -3,22 +3,22 @@
     ViewBag.Title = "Echipe";
 }
 
-<h1 style="color:royalblue">@ViewBag.Message</h1>
-<br />
-
-@foreach (Proiect.Models.Team t in ViewBag.Teams)
-{
-    <a href="/Teams/Show/@t.TeamId"><h1>@t.TeamName</h1></a>
-    <hr />
-    <br />
-}
-<br />
-<a href="/Projects/Index" class="btn btn-info" style="background-color:lightgreen">Lista proiectelor</a>
-<hr />
-<br />
-<a href="/Tasks/Index" class="btn btn-info" style="background-color:lightgreen">Lista taskurilor</a>
-<hr />
+@Html.Partial("_Notification")
 
 <br />
-<hr />
-<a href="/Teams/New" class="btn btn-info">Creare echipa</a>
+<br />
+<div class="panel panel-primary" style="border-color:#006600; margin-left:35%; margin-right:35%">
+    <div class="panel-heading" style="background-color:#006600; border-color:#006600;">
+            <h3 style="text-align:center">Echipele existente</h3>
+    </div>
+    <div class="panel-body" style="background-color:#ffff66; border-color:#006600; padding:0px;">
+        @foreach (Proiect.Models.Team t in ViewBag.Teams)
+        {
+            <li class="list-group-item" style="background-color:#ffff66; border-color:#006600;">
+                <a href="/Teams/Show/@t.TeamId"> <span class="glyphicon glyphicon-hand-right"></span>&nbsp;<b>@t.TeamName</b></a>
+            </li>
+        }
+        <div class="clearfix"></div>
+    </div>
+</div>
+

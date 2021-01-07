@@ -174,6 +174,7 @@
     <Compile Include="Controllers\ProjectsController.cs" />
     <Compile Include="Controllers\TasksController.cs" />
     <Compile Include="Controllers\TeamsController.cs" />
+    <Compile Include="Controllers\UsersController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -202,6 +203,9 @@
     <Content Include="Content\bootstrap-theme.min.css" />
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\Images\fundal.jpg" />
+    <Content Include="Content\Images\poza.jpg" />
+    <Content Include="Content\Images\poza2.jpg" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -270,6 +274,12 @@
     <Content Include="Views\Tasks\AddWorker.cshtml" />
     <Content Include="Views\Projects\AddTeam.cshtml" />
     <Content Include="Views\Teams\NewTeam.cshtml" />
+    <Content Include="Views\Tasks\ShowMyTasks.cshtml" />
+    <Content Include="Views\Tasks\EditStatus.cshtml" />
+    <Content Include="Views\Shared\_Notification.cshtml" />
+    <Content Include="Views\Users\Index.cshtml" />
+    <Content Include="Views\Home\HomePage.cshtml" />
+    <Content Include="Views\Teams\Search.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -15,42 +15,51 @@ namespace Proiect.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: Projects
-        public ActionResult Test()
-        {
-            ApplicationUser user = db.Users.Find(User.Identity.GetUserId());
-            var userRole = user.Roles.FirstOrDefault();
-            return RedirectToAction("Index");
-        }
+
         [HttpGet]
-        [Authorize(Roles = "Member,Organiser,Admin")]
+        [Authorize(Roles = "Admin,Organiser,Member")]
         public ActionResult Index()
         {
-
-            ViewBag.Projects = db.Projects;
-
-            if(TempData.ContainsKey("message"))
+            if (User.IsInRole("Admin"))
             {
-                ViewBag.Message = TempData["message"];
+                ViewBag.Projects = db.Projects.OrderBy(m => m.ProjectName);
+                return View();
             }
-            return View();
+            else
+            {
+                TempData["message"] = "Nu aveti dreptul de a accesa aceasta pagina!";
+                TempData["status"] = "danger";
+                return Redirect("/Home/Index");
+            }
+        }
+
+        [NonAction]
+        public bool isMember(int teamId, string userId)
+        {
+            var user = from x in db.TeamUsers
+                        where x.TeamId == teamId && x.Id == userId
+                        select x;
+            if (user != null)
+                return true;
+            return false;
         }
 
         [HttpGet]
         [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult Show(int id)
         {
-            Project project = db.Projects.Find(id);
-            if (TempData.ContainsKey("message"))
+            if (User.IsInRole("Admin") || isMember(db.Projects.Find(id).TeamId, User.Identity.GetUserId()))
             {
-                ViewBag.Message = TempData["message"];
+                Project project = db.Projects.Find(id);
+                setAccessRights(project);
+                return View(project);
             }
-            setAccessRights(project.UserId);
-
-            if(TempData.ContainsKey("message"))
+            else
             {
-                ViewBag.Message = TempData["message"];
+                TempData["message"] = "Nu aveti dreptul de a accesa aceasta pagina!";
+                TempData["status"] = "danger";
+                return Redirect("/Home/Index");
             }
-            return View(project);
         }
        
         [HttpGet]
@@ -139,7 +148,8 @@ namespace Proiect.Controllers
                         db.SaveChanges();
 
                     }
-                    TempData["message"] = "Proiectul a fost adaugat cu succes";
+                    TempData["message"] = "Proiectul a fost adaugat cu succes!";
+                    TempData["status"] = "success";
                     return Redirect("/Home/Index");
                 }
                 else
@@ -150,12 +160,13 @@ namespace Proiect.Controllers
                 return View(project);
             }
         }
+
         [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult AddTeam() 
         {
-                string currentUser = User.Identity.GetUserId();
-                ViewBag.Echipe = GetAllTeams(currentUser);
-                return View();
+            string currentUser = User.Identity.GetUserId();
+            ViewBag.Echipe = GetAllTeams(currentUser);
+            return View();
         }
         [HttpPut]
         [Authorize(Roles = "Organiser,Admin")]
@@ -180,7 +191,8 @@ namespace Proiect.Controllers
             }
             else
             {
-                TempData["message"] = "Nu aveti dreptul de a efectua aceasta actiune";
+                TempData["message"] = "Nu aveti dreptul de a efectua aceasta actiune!";
+                TempData["status"] = "danger";
                 return Redirect("/Home/Index");
             }
         }
@@ -197,8 +209,9 @@ namespace Proiect.Controllers
             }
             else
             {
-                TempData["message"] = "Nu ai voie sa midifici proiectul altei perosoane";
-                return RedirectToAction("Index");
+                TempData["message"] = "Nu ai voie sa modifici proiectul altei perosoane!";
+                TempData["status"] = "danger";
+                return Redirect("/Home/Index");
             }
         }
 
@@ -222,15 +235,17 @@ namespace Proiect.Controllers
                             project.TeamId = requestProject.TeamId;
                             db.SaveChanges();
                             TempData["message"] = "Proiectul a fost editat cu succes!";
-                            return RedirectToAction("Index");
+                            TempData["status"] = "warning";
+                            return Redirect("/Home/Index");
                         }
                         else
                             return View(requestProject);
                     }
                     else
                     {
-                        TempData["message"] = "Nu aveti drept sa modificati proiectul altei persoane";
-                        return RedirectToAction("Index");
+                        TempData["message"] = "Nu aveti dreptul sa modificati proiectul altei persoane!";
+                        TempData["status"] = "danger";
+                        return Redirect("/Home/Index");
                     }
                 }
                 else
@@ -252,19 +267,21 @@ namespace Proiect.Controllers
                 db.Projects.Remove(project);
                 db.SaveChanges();
                 TempData["message"] = "Proiectul a fost sters!";
-                return RedirectToAction("Index");
+                TempData["status"] = "warning";
+                return Redirect("/Home/Index");
             }
             else
             {
-                TempData["message"] = "Nu ai dreptul sa stergi acest proiect";
-                return RedirectToAction("Index");
+                TempData["message"] = "Nu ai dreptul sa stergi acest proiect!";
+                TempData["status"] = "danger";
+                return Redirect("/Home/Index");
             }
         }
         [NonAction]
-        private void setAccessRights(string userId)
+        private void setAccessRights(Project project)
         {
             ViewBag.afisareButoane = false;
-            if (User.IsInRole("Organiser") || User.IsInRole("Admin"))
+            if (project.UserId == User.Identity.GetUserId() || User.IsInRole("Admin"))
             {
                 ViewBag.afisareButoane = true;
             }

@@ -24,6 +24,7 @@ namespace Proiect.Controllers
                 db.Comments.Add(comment);
                 db.SaveChanges();
                 TempData["message"] = "Comentariul a fost adaugat!";
+                TempData["status"] = "success";
                 return Redirect("/Tasks/Show/" + comment.TaskId.ToString());
             }
             catch (Exception e)
@@ -42,8 +43,9 @@ namespace Proiect.Controllers
             }
             else
             {
-                TempData["message"] = "Nu aveti dreptul de a edita acest comentariu";
-                return Redirect("/Tasks/Show/" + comment.TaskId.ToString());
+                TempData["message"] = "Nu aveti dreptul de a edita acest comentariu!";
+                TempData["status"] = "danger";
+                return Redirect("/Home/Index");
             }
         }
 
@@ -63,13 +65,15 @@ namespace Proiect.Controllers
                         comment.Date = requestComment.Date;
                         db.SaveChanges();
                         TempData["message"] = "Comentariul a fost editat!";
+                        TempData["status"] = "warning";
                     }
                     return Redirect("/Tasks/Show/" + comment.TaskId.ToString());
                 }
                 else
                 {
-                    TempData["message"] = "Nu aveti dreptul de a edita acest comentariu";
-                    return Redirect("/Tasks/Show/" + comment.TaskId.ToString());
+                    TempData["message"] = "Nu aveti dreptul de a edita acest comentariu!";
+                    TempData["status"] = "danger";
+                    return Redirect("/Home/Index");
                 }
             }
             catch (Exception e)
@@ -88,13 +92,15 @@ namespace Proiect.Controllers
             {
                 db.Comments.Remove(comment);
                 db.SaveChanges();
-                TempData["message"] = "Comentariul a fost sters";
+                TempData["message"] = "Comentariul a fost sters!";
+                TempData["status"] = "warning";
                 return Redirect("/Tasks/Show/" + x.ToString());
             }
             else
             {
-                TempData["message"] = "Nu aveti dreptul de a sterge acest comentariu";
-                return Redirect("/Tasks/Show/" + x.ToString());
+                TempData["message"] = "Nu aveti dreptul de a sterge acest comentariu!";
+                TempData["status"] = "danger";
+                return Redirect("/Home/Index");
             }
         }
     }

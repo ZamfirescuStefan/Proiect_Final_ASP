@@ -9,24 +9,26 @@ using System.Web.Mvc;
 
 namespace Proiect_final.Controllers
 {
-    [Authorize(Roles = "Member,Organiser,Admin")]
     public class HomeController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
+        public ActionResult HomePage()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult Index()
         {
-            
-            if (TempData.ContainsKey("message"))
-            {
-                ViewBag.Message = TempData["message"];
-            }
             string UserId = User.Identity.GetUserId();
             ViewBag.Teams = listTeams(UserId);
             ViewBag.Projects = listProjects(UserId);
             ViewBag.IsAdmin = User.IsInRole("Admin");
             return View();
         }
+
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult About()
         {
             ViewBag.Message = "Your application description page.";
@@ -34,6 +36,7 @@ namespace Proiect_final.Controllers
             return View();
         }
 
+        [Authorize(Roles = "Member,Organiser,Admin")]
         public ActionResult Contact()
         {
             ViewBag.Message = "Your contact page.";
